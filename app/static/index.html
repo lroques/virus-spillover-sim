@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>Virus Spillover Simulator</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="eyebrow">Interactive stochastic spatial model</div>
+        <h1>Virus Spillover Simulator</h1>
+        <p class="hero-copy">
+          This toy example illustrates a possible application to Nipah virus spillover in Bangladesh.
+          K<sub>r</sub>(x) is the spatial reservoir density of <em>Pteropus medius</em> bats,
+          P(x, &theta;) is the Nipah pathogen density, K<sub>s</sub>(x) is human density
+          (the spillover host), and &alpha;(x) is a covariate corresponding to date-palm consumption.
+          The example is illustrative rather than calibrated: several parameter values should be adjusted
+          against epidemiological data before the outputs are interpreted as realistic.
+        </p>
+      </div>
+      <div class="formula-strip" aria-label="Model equations">
+        <div><span class="formula-label">Pathogen density</span><strong>P(x, &theta;) = G(&theta;) [J<sub>D</sub> * K<sub>r</sub>](x)</strong></div>
+        <div><span class="formula-label">Spillover intensity</span><strong>&lambda;(x, &theta;) = (&beta;<sub>0</sub> + &beta;<sub>1</sub>&alpha;(x)) K<sub>s</sub>(x) P(x, &theta;)</strong></div>
+        <div><span class="formula-label">Branching parameters (control transmission chain length)</span><strong>b(&theta;) = b<sub>0</sub>, &nbsp; d(&theta;) = d<sub>0</sub> + (&theta; - O<sub>s</sub>)<sup>2</sup></strong></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="controls-panel">
+      <section class="panel-card">
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">Model inputs</div>
+            <h2>Parameters</h2>
+          </div>
+          <button id="defaultsBtn" class="text-button" type="button">Restore demo defaults</button>
+        </div>
+
+        <label class="field">
+          <span class="field-row"><span>Target optimum O<sub>s</sub></span><output id="optimumOut">0.00</output></span>
+          <input id="optimumInput" type="range" min="0" max="3" step="0.05" value="0" />
+          <span class="hint">Pathogen trait values near O<sub>s</sub> have lower removal rates in the human host population.</span>
+        </label>
+
+        <label class="field">
+          <span class="field-row"><span>Spatial variance <i>D</i></span><span class="unit">km²</span></span>
+          <input id="DInput" type="number" min="0" max="10000" step="25" value="500" />
+          <span class="hint">Variance of the Gaussian kernel J<sub>D</sub>. Standard deviation = √D km.</span>
+        </label>
+
+        <div class="two-col">
+          <label class="field">
+            <span>&beta;<sub>0</sub></span>
+            <input id="beta0Input" type="number" min="0" max="0.000001" step="0.000000001" value="0.00000005" />
+            <span class="hint">Baseline spillover coefficient.</span>
+          </label>
+          <label class="field">
+            <span>&beta;<sub>1</sub></span>
+            <input id="beta1Input" type="number" min="0" max="0.000001" step="0.000000001" value="0.00000002" />
+            <span class="hint">Contact-dependent coefficient.</span>
+          </label>
+        </div>
+
+        <div class="two-col">
+          <label class="field">
+            <span>b<sub>0</sub></span>
+            <input id="b0Input" type="number" min="0" max="5" step="0.05" value="0.5" />
+            <span class="hint">Per-capita transmission (birth) rate within a local chain.</span>
+          </label>
+          <label class="field">
+            <span>d<sub>0</sub></span>
+            <input id="d0Input" type="number" min="0" max="5" step="0.05" value="0.3" />
+            <span class="hint">Baseline per-capita removal/extinction (death) rate within a local chain.</span>
+          </label>
+        </div>
+
+        <details class="advanced">
+          <summary>Simulation controls</summary>
+          <div class="two-col details-grid">
+            <label class="field compact">
+              <span>Duration</span>
+              <input id="durationInput" type="number" min="1" max="50" step="1" value="50" />
+              <span class="hint">Model-time units.</span>
+            </label>
+            <label class="field compact">
+              <span>Random seed</span>
+              <input id="seedInput" type="number" min="0" max="2147483647" step="1" value="2030" />
+              <span class="hint">For reproducibility.</span>
+            </label>
+          </div>
+        </details>
+
+        <div class="action-row">
+          <button id="runBtn" class="primary-button" type="button">Run simulation</button>
+          <button id="newBtn" class="secondary-button" type="button">New realization</button>
+        </div>
+        <div id="status" class="status" role="status">Ready.</div>
+      </section>
+
+      <section class="panel-card model-card">
+        <div class="section-kicker">How to read the model</div>
+        <h2>Mechanism</h2>
+        <ol class="mechanism-list">
+          <li><strong>Reservoir smoothing.</strong> K<sub>r</sub> is the spatial bat-reservoir density and is convolved with the Gaussian spatial kernel J<sub>D</sub>.</li>
+          <li><strong>Pathogen trait.</strong> G is the standard Gaussian density, so the pathogen trait &theta; is distributed as N(0,1).</li>
+          <li><strong>Marked Poisson spillover.</strong> Primary human infections appear in K<sub>s</sub> with intensity proportional to (&beta;<sub>0</sub> + &beta;<sub>1</sub>&alpha;(x)) K<sub>s</sub>(x) P(x, &theta;).</li>
+          <li><strong>Branching transmission.</strong> Each primary infection starts an independent continuous-time birth-death process. The birth parameter controls onward transmission and the death/removal parameter controls chain termination; together they determine the length of transmission chains. Growth is favored when b<sub>0</sub> &gt; d<sub>0</sub> + (&theta; - O<sub>s</sub>)<sup>2</sup>.</li>
+        </ol>
+      </section>
+    </aside>
+
+    <section class="workspace">
+      <div class="stats-grid">
+        <div class="stat-card"><span>Model time</span><strong id="timeStat">0.0</strong></div>
+        <div class="stat-card"><span>Spillover seeds</span><strong id="seedStat">0</strong><small id="expectedStat">expected -</small></div>
+        <div class="stat-card"><span>Active infected people</span><strong id="activeStat">0</strong></div>
+        <div class="stat-card"><span>People ever infected</span><strong id="reachedStat">0</strong></div>
+        <div class="stat-card"><span>Active transmission chains</span><strong id="clusterStat">0</strong></div>
+      </div>
+
+      <section class="map-card">
+        <div class="map-toolbar">
+          <div>
+            <div class="section-kicker">Spatial view</div>
+            <h2>Virus spillover and local transmission</h2>
+          </div>
+          <div class="toolbar-controls">
+            <label>Background
+              <select id="layerSelect">
+                <option value="Ks">Human density K_s</option>
+                <option value="Kr">Bat reservoir density K_r</option>
+                <option value="alpha">Date-palm consumption covariate alpha</option>
+                <option value="reservoir_smoothed">Smoothed reservoir J_D * K_r</option>
+                <option value="spillover" selected>Spillover intensity</option>
+              </select>
+            </label>
+            <label>Playback
+              <select id="speedSelect">
+                <option value="0.5">0.5×</option>
+                <option value="1" selected>1×</option>
+                <option value="2">2×</option>
+                <option value="4">4×</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="canvas-wrap" id="mapWrap">
+          <canvas id="mapCanvas" aria-label="Animated virus spillover map"></canvas>
+          <div id="mapTooltip" class="map-tooltip" hidden></div>
+          <div class="map-legend">
+            <span id="legendLabel">Spillover intensity</span>
+            <div class="viridis-bar"></div>
+            <div class="legend-values"><span id="legendMin">-</span><span id="legendMax">-</span></div>
+          </div>
+          <div class="cluster-legend">
+            <span><i class="dot growth"></i> locally supercritical</span>
+            <span><i class="dot decline"></i> locally subcritical</span>
+          </div>
+        </div>
+
+        <div class="timeline-row">
+          <button id="playBtn" class="play-button" type="button" aria-label="Play or pause">Pause</button>
+          <input id="timeline" type="range" min="0" max="180" step="1" value="0" />
+          <span id="timelineLabel">t = 0.0</span>
+        </div>
+      </section>
+
+      <section class="chart-card">
+        <div class="chart-heading">
+          <div>
+            <div class="section-kicker">Population trajectory</div>
+            <h2>Infected people over time</h2>
+          </div>
+          <div class="chart-key"><span><i class="line active-line"></i>actively infected</span><span><i class="line reached-line"></i>ever infected</span></div>
+        </div>
+        <canvas id="chartCanvas" aria-label="Time series of infected people"></canvas>
+      </section>
+
+      <section class="diagnostics-card">
+        <div>
+          <div class="section-kicker">Current realization</div>
+          <h2>Diagnostics</h2>
+        </div>
+        <div class="diagnostic-grid">
+          <div><span>Poisson rate</span><strong id="rateDiag">-</strong><small>seeds / model-time</small></div>
+          <div><span>Supercritical seed traits</span><strong id="superDiag">-</strong><small>b(&theta;) &gt; d(&theta;)</small></div>
+          <div><span>Largest transmission chain</span><strong id="largestDiag">-</strong><small>people ever infected</small></div>
+        </div>
+        <div id="warningBox" class="warning-box" hidden></div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="credits">
+    <div class="credits-inner">
+      <div>
+        <div class="section-kicker">Credits</div>
+        <h2>Data, model, and implementation</h2>
+      </div>
+      <div class="credit-grid">
+        <div><span>Data (K<sub>r</sub>)</span><strong>to be added</strong></div>
+        <div><span>Data (K<sub>s</sub>)</span><strong><a href="https://www.worldpop.org" target="_blank" rel="noopener">www.worldpop.org</a></strong></div>
+        <div><span>Data (&alpha;)</span><strong>to be added</strong></div>
+        <div><span>Model</span><strong>O. Bonnefon, C. Chane-Ki-Chune, G. Fournié, L. Roques</strong></div>
+        <div><span>Web-app</span><strong>L. Houde, S. Lanoë, L. Roques</strong></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
