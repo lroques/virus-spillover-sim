@@ -39,7 +39,7 @@ a { color: inherit; }
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(560px, 1.1fr);
   gap: 44px;
-  align-items: end;
+  align-items: stretch;
 }
 .eyebrow, .section-kicker {
   text-transform: uppercase;
@@ -65,6 +65,39 @@ h2 {
   color: #c8d7e4;
   font-size: 16px;
   max-width: 670px;
+}
+.hero-right {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.project-banner {
+  align-self: flex-end;
+  width: min(100%, 620px);
+  padding: 14px 18px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255,255,255,.34);
+  border-left: 5px solid #f2c94c;
+  border-radius: 10px;
+  background: rgba(255,255,255,.10);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.025);
+  color: #f8fbff;
+  font-size: 15px;
+  line-height: 1.45;
+  backdrop-filter: blur(8px);
+}
+.project-banner a {
+  font-weight: 800;
+  color: #f8fbff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.project-banner a:hover {
+  text-decoration-thickness: 2px;
+}
+.hero-right .formula-strip {
+  margin-top: 0;
+  padding-top: 0;
 }
 .formula-strip {
   display: grid;
@@ -265,6 +298,8 @@ h2 {
 
 @media (max-width: 1180px) {
   .hero-inner { grid-template-columns: 1fr; }
+  .project-banner { align-self: flex-start; }
+  .hero-right .formula-strip { margin-top: 18px; padding-top: 0; }
   .app-shell { grid-template-columns: 1fr; }
   .controls-panel { position: static; grid-template-columns: 1fr 1fr; }
   .stats-grid { grid-template-columns: repeat(3, 1fr); }

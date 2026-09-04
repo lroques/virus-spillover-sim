@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light" />
   <title>Virus Spillover Simulator</title>
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="/static/style.css?v=4" />
 </head>
 <body>
   <header class="hero">
@@ -14,22 +14,25 @@
         <div class="eyebrow">Interactive stochastic spatial model</div>
         <h1>Virus Spillover Simulator</h1>
         <p class="hero-copy">
-          This toy example illustrates a possible application to Nipah virus spillover in Bangladesh.
-          K<sub>r</sub>(x) is the spatial reservoir density of <em>Pteropus medius</em> bats,
-          P(x, &theta;) is the Nipah pathogen density, K<sub>s</sub>(x) is human density
-          (the spillover host), and &alpha;(x) is a covariate corresponding to date-palm consumption.
-          The example is illustrative rather than calibrated: several parameter values should be adjusted
-          against epidemiological data before the outputs are interpreted as realistic.
+          We propose a generic, pathogen-centred framework for zoonotic emergence, combining
+          spatial layers for a reservoir host K<sub>r</sub>(x), a spillover host K<sub>s</sub>(x),
+          and, when relevant, a covariate &alpha;(x). Host populations are characterized by
+          pathogen phenotypic optima following Fisher's Geometric Model, while pathogen density
+          P(x, &theta;) is structured by space and trait. Here we illustrate the framework with
+          a toy example of Nipah virus spillover in Bangladesh, using <em>Pteropus medius</em>
+          bats as reservoir hosts, humans as spillover hosts, and date-palm consumption as covariate.
         </p>
-        <div class="project-banner" role="note" aria-label="BCOMING European project" style="margin-top: 1.15rem; padding: 0.9rem 1.1rem; border: 1px solid rgba(255,255,255,0.32); border-left: 4px solid #f2c94c; border-radius: 10px; background: rgba(255,255,255,0.10); line-height: 1.45;">
-          This web-app was developed in the framework of the European
-          <a href="https://bcoming.eu/en/" target="_blank" rel="noopener" style="font-weight: 700; text-decoration: underline;">BCOMING project</a>.
-        </div>
       </div>
-      <div class="formula-strip" aria-label="Model equations">
-        <div><span class="formula-label">Pathogen density</span><strong>P(x, &theta;) = G(&theta;) [J<sub>D</sub> * K<sub>r</sub>](x)</strong></div>
-        <div><span class="formula-label">Spillover intensity</span><strong>&lambda;(x, &theta;) = (&beta;<sub>0</sub> + &beta;<sub>1</sub>&alpha;(x)) K<sub>s</sub>(x) P(x, &theta;)</strong></div>
-        <div><span class="formula-label">Branching parameters (control transmission chain length)</span><strong>b(&theta;) = b<sub>0</sub>, &nbsp; d(&theta;) = d<sub>0</sub> + (&theta; - O<sub>s</sub>)<sup>2</sup></strong></div>
+      <div class="hero-right">
+        <div class="project-banner" role="note" aria-label="BCOMING European project">
+          This web-app was developed in the framework of the European
+          <a href="https://bcoming.eu/en/" target="_blank" rel="noopener">BCOMING project</a>.
+        </div>
+        <div class="formula-strip" aria-label="Model equations">
+          <div><span class="formula-label">Pathogen density</span><strong>P(x, &theta;) = G(&theta;) (J<sub>D</sub> &#8902; K<sub>r</sub>)(x)</strong></div>
+          <div><span class="formula-label">Spillover intensity</span><strong>&lambda;(x, &theta;) = (&beta;<sub>0</sub> + &beta;<sub>1</sub>&alpha;(x)) K<sub>s</sub>(x) P(x, &theta;)</strong></div>
+          <div><span class="formula-label">Branching parameters (control transmission chain length)</span><strong>b(&theta;) = b<sub>0</sub>, &nbsp; d(&theta;) = d<sub>0</sub> + (&theta; - O<sub>s</sub>)<sup>2</sup></strong></div>
+        </div>
       </div>
     </div>
   </header>
