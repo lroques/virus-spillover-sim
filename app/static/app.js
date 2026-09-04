@@ -3,7 +3,7 @@
 
   const ui = {
     D: $("DInput"), beta0: $("beta0Input"), beta1: $("beta1Input"), b0: $("b0Input"), d0: $("d0Input"), optimum: $("optimumInput"),
-    optimumOut: $("optimumOut"), duration: $("durationInput"), seed: $("seedInput"),
+    optimumOut: $("optimumOut"), maxChainLength: $("maxChainLengthInput"), maxChainLengthOut: $("maxChainLengthOut"), duration: $("durationInput"), seed: $("seedInput"),
     defaultsBtn: $("defaultsBtn"), runBtn: $("runBtn"), newBtn: $("newBtn"), status: $("status"),
     layer: $("layerSelect"), speed: $("speedSelect"), play: $("playBtn"), timeline: $("timeline"), timelineLabel: $("timelineLabel"),
     mapCanvas: $("mapCanvas"), mapWrap: $("mapWrap"), tooltip: $("mapTooltip"), chartCanvas: $("chartCanvas"),
@@ -32,6 +32,7 @@
       beta1: Number(ui.beta1.value),
       b0: Number(ui.b0.value),
       d0: Number(ui.d0.value),
+      max_chain_length: Math.trunc(Number(ui.maxChainLength.value)),
       optimum: Number(ui.optimum.value),
       duration: Number(ui.duration.value),
       frames: 181,
@@ -80,6 +81,8 @@
     ui.beta1.value = d.beta1;
     ui.b0.value = d.b0;
     ui.d0.value = d.d0;
+    ui.maxChainLength.value = d.max_chain_length;
+    ui.maxChainLengthOut.value = String(d.max_chain_length);
     ui.optimum.value = d.optimum;
     ui.optimumOut.value = Number(d.optimum).toFixed(2);
     ui.duration.value = d.duration;
@@ -90,6 +93,7 @@
   function markDirty() {
     state.dirty = true;
     ui.optimumOut.value = Number(ui.optimum.value).toFixed(2);
+    ui.maxChainLengthOut.value = String(Math.trunc(Number(ui.maxChainLength.value)));
     if (state.sim) setStatus("Parameters changed - run the simulation to apply them.");
     debounceLayerReload();
   }
@@ -501,6 +505,7 @@
   }
 
   ui.optimum.addEventListener("input", markDirty);
+  ui.maxChainLength.addEventListener("input", markDirty);
   for (const el of [ui.D, ui.beta0, ui.beta1, ui.b0, ui.d0, ui.duration, ui.seed]) el.addEventListener("input", markDirty);
   ui.defaultsBtn.addEventListener("click", applyDefaults);
   ui.runBtn.addEventListener("click", runSimulation);

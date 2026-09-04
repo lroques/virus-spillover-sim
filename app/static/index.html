@@ -83,6 +83,12 @@
           </label>
         </div>
 
+        <label class="field">
+          <span class="field-row"><span>Max length of transmission chains</span><output id="maxChainLengthOut">50</output></span>
+          <input id="maxChainLengthInput" type="range" min="0" max="500" step="1" value="50" />
+          <span class="hint">For positive values, caps the number of people ever infected in each local transmission chain. Set to 0 to disable onward transmission from the spillover seed.</span>
+        </label>
+
         <details class="advanced">
           <summary>Simulation controls</summary>
           <div class="two-col details-grid">
@@ -113,7 +119,7 @@
           <li><strong>Reservoir smoothing.</strong> K<sub>r</sub> is the spatial bat-reservoir density and is convolved with the Gaussian spatial kernel J<sub>D</sub>.</li>
           <li><strong>Pathogen trait.</strong> G is the standard Gaussian density, so the pathogen trait &theta; is distributed as N(0,1).</li>
           <li><strong>Marked Poisson spillover.</strong> Primary human infections appear in K<sub>s</sub> with intensity proportional to (&beta;<sub>0</sub> + &beta;<sub>1</sub>&alpha;(x)) K<sub>s</sub>(x) P(x, &theta;).</li>
-          <li><strong>Branching transmission.</strong> Each primary infection starts an independent continuous-time birth-death process. The birth parameter controls onward transmission and the death/removal parameter controls chain termination; together they determine the length of transmission chains. Growth is favored when b<sub>0</sub> &gt; d<sub>0</sub> + (&theta; - O<sub>s</sub>)<sup>2</sup>.</li>
+          <li><strong>Branching transmission.</strong> Each primary infection starts an independent continuous-time birth-death process. The birth parameter controls onward transmission and the death/removal parameter controls chain termination; together they determine the length of transmission chains. Growth is favored when b<sub>0</sub> &gt; d<sub>0</sub> + (&theta; - O<sub>s</sub>)<sup>2</sup>. The user-selected maximum chain length caps the number of people ever infected in each local chain; setting it to 0 prevents secondary transmission.</li>
         </ol>
       </section>
     </aside>

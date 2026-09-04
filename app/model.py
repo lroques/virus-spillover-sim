@@ -21,6 +21,7 @@ DEFAULTS = {
     "beta1": 2e-8,
     "b0": 0.5,
     "d0": 0.3,
+    "max_chain_length": 50,
     "optimum": 1.0,
     "duration": 50.0,   # model-time units
     "frames": 181,
@@ -111,6 +112,7 @@ def _branch_trajectory(
     optimum: float,
     b0: float,
     d0: float,
+    max_chain_length: int,
     frame_times: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray, bool]:
     """Exact Gillespie simulation of a linear birth-death transmission process from one primary infection."""
@@ -127,14 +129,22 @@ def _branch_trajectory(
     n_events = 0
     capped = False
 
+    # A value of 0 means no onward transmission: the spillover case can still be removed.
+    # For positive values, max_chain_length is the maximum number of people ever infected
+    # in this local chain, including the primary spillover case.
+    max_cases = 1 if max_chain_length <= 0 else max_chain_length
+
     while t < frame_times[-1] and active > 0:
-        total_rate = active * (birth + death)
+        births_allowed = cumulative < max_cases
+        birth_rate = active * birth if births_allowed else 0.0
+        death_rate = active * death
+        total_rate = birth_rate + death_rate
         if total_rate <= 0:
             break
         t_next = t + float(rng.exponential(1.0 / total_rate))
         if t_next > frame_times[-1]:
             break
-        if rng.random() < birth / (birth + death):
+        if birth_rate > 0 and rng.random() < birth_rate / total_rate:
             active += 1
             cumulative += 1
         else:
@@ -173,7 +183,11 @@ def simulate(
     duration: float,
     frames: int,
     seed: int,
+    max_chain_length: int = DEFAULTS["max_chain_length"],
 ) -> dict[str, Any]:
+    if max_chain_length < 0 or max_chain_length > 500:
+        raise ValueError("Max length of transmission chains must be between 0 and 500.")
+
     maps = load_maps()
     density, conv = spatial_intensity(D, beta0, beta1, maps)
 
@@ -225,7 +239,7 @@ def simulate(
         theta = float(thetas[k])
         arrival = float(arrivals[k])
         death = trait_death_rate(theta, optimum, d0)
-        active, reached, capped = _branch_trajectory(rng, arrival, theta, optimum, b0, d0, frame_times)
+        active, reached, capped = _branch_trajectory(rng, arrival, theta, optimum, b0, d0, max_chain_length, frame_times)
         if capped:
             warnings.append(
                 "At least one transmission chain hit the safety cap; its later trajectory is held at the capped state."
@@ -274,6 +288,7 @@ def simulate(
             "beta1": beta1,
             "b0": b0,
             "d0": d0,
+            "max_chain_length": max_chain_length,
             "optimum": optimum,
             "duration": duration,
             "frames": frames,
@@ -326,6 +341,7 @@ def model_metadata() -> dict[str, Any]:
             "beta1": {"min": 0.0, "max": 1e-6},
             "b0": {"min": 0.0, "max": 5.0},
             "d0": {"min": 0.0, "max": 5.0},
+            "max_chain_length": {"min": 0, "max": 500},
             "optimum": {"min": 0, "max": 3.0},
             "duration": {"min": 1.0, "max": 50.0},
             "frames": {"min": 61, "max": 301},

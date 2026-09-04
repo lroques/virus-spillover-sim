@@ -14,7 +14,7 @@ from .render import render_layer_png
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 
-app = FastAPI(title="Virus Spillover Simulator", version="1.2.0")
+app = FastAPI(title="Virus Spillover Simulator", version="1.3.0")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
@@ -24,6 +24,7 @@ class SimulationRequest(BaseModel):
     beta1: float = Field(DEFAULTS["beta1"], ge=0.0, le=1e-6)
     b0: float = Field(DEFAULTS["b0"], ge=0.0, le=5.0)
     d0: float = Field(DEFAULTS["d0"], ge=0.0, le=5.0)
+    max_chain_length: int = Field(DEFAULTS["max_chain_length"], ge=0, le=500)
     optimum: float = Field(DEFAULTS["optimum"], ge=-3.0, le=3.0)
     duration: float = Field(DEFAULTS["duration"], ge=1.0, le=50.0)
     frames: int = Field(DEFAULTS["frames"], ge=61, le=301)
@@ -36,6 +37,7 @@ _FIELD_LABELS = {
     "beta1": "beta1",
     "b0": "b0",
     "d0": "d0",
+    "max_chain_length": "Max length of transmission chains",
     "optimum": "Target optimum O_s",
     "duration": "Duration",
     "frames": "Frames",
@@ -102,6 +104,7 @@ def api_simulate(req: SimulationRequest) -> JSONResponse:
             beta1=req.beta1,
             b0=req.b0,
             d0=req.d0,
+            max_chain_length=req.max_chain_length,
             optimum=req.optimum,
             duration=req.duration,
             frames=req.frames,
