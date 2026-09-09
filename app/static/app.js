@@ -324,7 +324,7 @@
         const p = project(c.lon, c.lat, g);
         const r = Math.min(42, 2.5 + 1.9 * Math.sqrt(reached));
         const warm = c.supercritical;
-        const rgb = warm ? [198, 99, 70] : [47, 116, 108];
+        const rgb = warm ? [196, 67, 54] : [37, 92, 171];
         const fillAlpha = active > 0 ? 0.10 : 0.035;
         const strokeAlpha = active > 0 ? 0.72 : 0.30;
         ctx.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${fillAlpha})`;
