@@ -240,11 +240,36 @@
   }
 
   function mapGeometry(width, height) {
-    const left = width < 540 ? 44 : 54;
-    const right = 18;
-    const top = 20;
-    const bottom = 42;
-    return { left, right, top, bottom, w: width - left - right, h: height - top - bottom };
+    // Fit the geographic extent with one physical scale in both directions.
+    // A degree of longitude is shorter than a degree of latitude away from the equator,
+    // so the cosine correction prevents the country from stretching with the canvas.
+    const marginLeft = width < 540 ? 44 : 54;
+    const marginRight = 18;
+    const marginTop = 20;
+    const marginBottom = 42;
+    const availW = Math.max(1, width - marginLeft - marginRight);
+    const availH = Math.max(1, height - marginTop - marginBottom);
+
+    const m = state.meta.map;
+    const lonSpan = Math.max(1e-9, m.lon_max - m.lon_min);
+    const latSpan = Math.max(1e-9, m.lat_max - m.lat_min);
+    const meanLatRad = 0.5 * (m.lat_min + m.lat_max) * Math.PI / 180;
+    const geoWidth = lonSpan * Math.max(0.05, Math.cos(meanLatRad));
+    const geoHeight = latSpan;
+    const scale = Math.min(availW / geoWidth, availH / geoHeight);
+    const w = geoWidth * scale;
+    const h = geoHeight * scale;
+    const left = marginLeft + 0.5 * (availW - w);
+    const top = marginTop + 0.5 * (availH - h);
+
+    return {
+      left,
+      right: width - left - w,
+      top,
+      bottom: height - top - h,
+      w,
+      h,
+    };
   }
 
   function project(lon, lat, geom) {
@@ -261,13 +286,13 @@
     const g = mapGeometry(width, height);
     state.mapMetrics = g;
     ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = "#f8fafc";
+    ctx.fillStyle = "#f7f3e9";
     ctx.fillRect(0, 0, width, height);
 
     const xTicks = [86, 88, 90, 92, 94, 96];
     const yTicks = [20, 22, 24, 26, 28];
     ctx.save();
-    ctx.strokeStyle = "#e5eaf0";
+    ctx.strokeStyle = "#ddd6c9";
     ctx.lineWidth = 1;
     for (const lon of xTicks) {
       const p = project(lon, state.meta.map.lat_min, g);
@@ -299,7 +324,7 @@
         const p = project(c.lon, c.lat, g);
         const r = Math.min(42, 2.5 + 1.9 * Math.sqrt(reached));
         const warm = c.supercritical;
-        const rgb = warm ? [231, 104, 69] : [44, 121, 199];
+        const rgb = warm ? [198, 99, 70] : [47, 116, 108];
         const fillAlpha = active > 0 ? 0.10 : 0.035;
         const strokeAlpha = active > 0 ? 0.72 : 0.30;
         ctx.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${fillAlpha})`;
@@ -309,13 +334,13 @@
         ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         ctx.setLineDash([]);
 
-        ctx.fillStyle = active > 0 ? `rgb(${rgb[0]},${rgb[1]},${rgb[2]})` : "#667085";
+        ctx.fillStyle = active > 0 ? `rgb(${rgb[0]},${rgb[1]},${rgb[2]})` : "#7b7b70";
         ctx.beginPath(); ctx.arc(p.x, p.y, 2.6, 0, Math.PI * 2); ctx.fill();
 
         const age = t - c.arrival;
         if (age >= 0 && age <= 0.75) {
           const pulseR = 5 + age * 18;
-          ctx.strokeStyle = `rgba(255,255,255,${0.9 * (1 - age / 0.75)})`;
+          ctx.strokeStyle = `rgba(255,253,248,${0.95 * (1 - age / 0.75)})`;
           ctx.lineWidth = 2;
           ctx.beginPath(); ctx.arc(p.x, p.y, pulseR, 0, Math.PI * 2); ctx.stroke();
         }
@@ -323,12 +348,12 @@
     }
     ctx.restore();
 
-    ctx.strokeStyle = "#344054";
+    ctx.strokeStyle = "#59645f";
     ctx.lineWidth = 1.1;
     ctx.strokeRect(g.left, g.top, g.w, g.h);
 
-    ctx.fillStyle = "#475467";
-    ctx.font = "11px Inter, system-ui, sans-serif";
+    ctx.fillStyle = "#5f675f";
+    ctx.font = "11px \"Trebuchet MS\", \"Segoe UI\", Arial, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
     for (const lon of xTicks) {
@@ -354,7 +379,7 @@
   function drawChart() {
     const { ctx, width, height } = sizeCanvas(ui.chartCanvas);
     ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = "#fffdf8";
     ctx.fillRect(0, 0, width, height);
     if (!state.sim) return;
 
@@ -366,9 +391,9 @@
     const xp = (i) => left + i / (n - 1) * pw;
     const yp = (v) => top + ph - v / maxY * ph;
 
-    ctx.strokeStyle = "#e4e9ef";
-    ctx.fillStyle = "#667085";
-    ctx.font = "10px Inter, system-ui, sans-serif";
+    ctx.strokeStyle = "#e0d8ca";
+    ctx.fillStyle = "#6d716a";
+    ctx.font = "10px \"Trebuchet MS\", \"Segoe UI\", Arial, sans-serif";
     ctx.lineWidth = 1;
     for (let k = 0; k <= 4; k++) {
       const v = maxY * k / 4;
@@ -388,19 +413,19 @@
       });
       ctx.stroke();
     }
-    line(sim.totals.reached, "#e76845", 2.1);
-    line(sim.totals.active, "#2c79c7", 2.0);
+    line(sim.totals.reached, "#c66346", 2.1);
+    line(sim.totals.active, "#2f746c", 2.0);
 
     const xcur = xp(state.frame);
-    ctx.strokeStyle = "#101828";
+    ctx.strokeStyle = "#173c35";
     ctx.lineWidth = 1;
     ctx.setLineDash([4, 4]);
     ctx.beginPath(); ctx.moveTo(xcur, top); ctx.lineTo(xcur, top + ph); ctx.stroke();
     ctx.setLineDash([]);
 
-    ctx.strokeStyle = "#98a2b3";
+    ctx.strokeStyle = "#aaa294";
     ctx.beginPath(); ctx.moveTo(left, top + ph); ctx.lineTo(left + pw, top + ph); ctx.stroke();
-    ctx.fillStyle = "#667085";
+    ctx.fillStyle = "#6d716a";
     ctx.textAlign = "left"; ctx.textBaseline = "top";
     ctx.fillText("0", left, top + ph + 7);
     ctx.textAlign = "right";
@@ -516,6 +541,11 @@
   ui.mapCanvas.addEventListener("mousemove", handleMapMove);
   ui.mapCanvas.addEventListener("mouseleave", () => { ui.tooltip.hidden = true; });
   window.addEventListener("resize", () => { drawMap(); drawChart(); });
+  if ("ResizeObserver" in window) {
+    const resizeObserver = new ResizeObserver(() => { drawMap(); drawChart(); });
+    resizeObserver.observe(ui.mapCanvas);
+    resizeObserver.observe(ui.chartCanvas);
+  }
 
   requestAnimationFrame(animate);
   init();

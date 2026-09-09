@@ -44,7 +44,7 @@ def _rgba_from_values(values: np.ndarray, mode: str, vmin: float | None = None, 
 
     # Add a high-contrast country outline derived from the common mask.
     edge = maps.mask & ~binary_erosion(maps.mask, structure=np.ones((3, 3), dtype=bool))
-    rgba[edge, :3] = np.array([20, 28, 45], dtype=np.uint8)
+    rgba[edge, :3] = np.array([38, 55, 49], dtype=np.uint8)
     rgba[edge, 3] = 255
     return rgba
 
@@ -83,7 +83,7 @@ def render_layer_png(
         vmin = float(np.nanmin(finite))
         vmax = float(np.nanmax(finite))
         mode = "linear"
-        label = "J_D * K_r"
+        label = "J_D ⋆ K_r"
     elif layer == "spillover":
         values, _ = spatial_intensity(D, beta0, beta1, maps)
         finite = values[np.isfinite(values) & (values > 0)]
